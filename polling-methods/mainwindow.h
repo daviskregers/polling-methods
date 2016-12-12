@@ -36,6 +36,7 @@ public:
     void test_data();
 
     void do_vare();
+    void do_cumbs();
 
 private slots:
     void on_pushButton_clicked();

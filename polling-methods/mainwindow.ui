@@ -269,7 +269,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>660</x>
@@ -287,6 +287,11 @@
        <item>
         <property name="text">
          <string>Varē metode</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Kumbsa metode</string>
         </property>
        </item>
       </widget>
@@ -307,13 +312,10 @@
      </item>
     </layout>
    </widget>
+   <zorder>layoutWidget</zorder>
    <zorder>tableWidget</zorder>
    <zorder>label</zorder>
-   <zorder>pushButton</zorder>
-   <zorder>comboBox</zorder>
    <zorder>textEdit</zorder>
-   <zorder>pushButton_2</zorder>
-   <zorder>pushButton</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">

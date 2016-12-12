@@ -106,8 +106,8 @@ bool MainWindow::preprocess_data() {
 
         for( int j = 0; j < 20; j++ ) {
 
-            if(ui->tableWidget->item(0, j)->text() != "") {
-                this->attributes[j] = ui->tableWidget->item(0, j)->text();
+            if(ui->tableWidget->item(j, 0)->text() != "") {
+                this->attributes[j] = ui->tableWidget->item(j, 0)->text();
             }
 
         }
@@ -162,7 +162,7 @@ void MainWindow::do_vare() {
 
                         bool found = false;
                         // not discarded, check if not already occured
-                        for(int j = 1; j < 20; j++) {
+                        for(int j = 0; j < 20; j++) {
 
                             if( occurences[j].contains(table[k][i]) ) {
                                 occurences[j].remove(table[k][i], Qt::CaseInsensitive);
@@ -205,11 +205,11 @@ void MainWindow::do_vare() {
                 discard.remove(occurences[maxVal], Qt::CaseInsensitive);
                 discarded.append(discard);
 
-                attachText("Step 2: discard lowest votes: " + discard);
+                attachText(" discard lowest votes: " + discard);
 
             }
             else {
-                attachText("Step 2: found the winner! It is: " + occurences[maxVal]);
+                attachText("\n found the winner! It is: " + occurences[maxVal]);
                 finished = true;
             }
 
@@ -218,12 +218,119 @@ void MainWindow::do_vare() {
 
 }
 
+void MainWindow::do_cumbs() {
+
+    attachText("Using cumbs method");
+
+    QString occurences[20] = {};
+    QString discarded = "";
+    bool finished = false;
+    int iters = 0;
+
+        while(!finished) {
+            iters++;
+
+            if( iters > 50 ) {
+                attachText("50 Max iterations exceeded - stopping");
+                break;
+            }
+
+            for( int i = 19; i >= 0; i--) {
+                occurences[i] = "";
+            }
+
+            for( int i = 0; i < 20; i++) {
+                if(!discarded.contains(attributes[i], Qt::CaseInsensitive)) {
+                    occurences[0] = occurences[0] + attributes[i];
+                }
+            }
+
+            for( int i = 19; i >= 0; i--) { // each column
+                if(table[0][i] == "") continue;
+
+                for( int k = 19; k >= 0; k--) {
+
+                    if(table[k][i] == "") continue;
+
+                    // check if discarded
+                    if( discarded.contains(table[k][i], Qt::CaseInsensitive) ) {
+                        continue; // increase row
+                    }
+                    else {
+
+                        bool found = false;
+                        // not discarded, check if not already occured
+                        for(int j = 19; j >= 0; j--) {
+
+                            if( occurences[j].contains(table[k][i]) ) {
+                                occurences[j].remove(table[k][i], Qt::CaseInsensitive);
+                                occurences[j+1] = occurences[j+1] + table[k][i];
+                                found = true;
+                                break;
+                            }
+
+                        }
+
+                        if(!found) {
+                            occurences[1] = occurences[1] + table[k][i];
+                        }
+                        break;
+
+                    }
+
+                }
+
+            }
+
+            QString votes = "";
+            QString discard = "";
+            int maxVal = 0;
+            for( int i = 0; i < 20; i++) {
+                if(occurences[i] != "") {
+                    maxVal = i;
+
+                }
+            }
+
+            int minVal = 19;
+            for( int i = 19; i >= 0; i--) {
+                if(occurences[i] != "") {
+                    minVal = i;
+                    discard.append(occurences[i]);
+                    votes = votes + " ["+ QString::number(i) +"] => " + occurences[i] + "\n";
+                }
+            }
+
+            attachText("Step 1: following highest votes casted: \n" + votes);
+            qDebug() << "maxVal: " << QString::number(maxVal);
+            qDebug() << "maxValval: " << occurences[maxVal];
+            qDebug() << "maxVallen: " << occurences[maxVal].length();
+
+            if(occurences[minVal].length() > 1) {
+
+//                discard.remove(occurences[maxVal], Qt::CaseInsensitive);
+                discarded.append(occurences[maxVal]);
+
+                attachText(" discard lowest votes: " + discard);
+
+            }
+            else {
+                attachText("\n found the winner! It is: " + occurences[minVal]);
+                finished = true;
+            }
+
+        }
+}
+
 void MainWindow::do_process() {
 
     if(preprocess_data()) {
 
         if(ui->comboBox->currentIndex() == 0) {
             do_vare();
+        }
+        else if(ui->comboBox->currentIndex() == 1) {
+            do_cumbs();
         }
 
     }
