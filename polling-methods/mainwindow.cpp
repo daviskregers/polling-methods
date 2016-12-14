@@ -29,7 +29,7 @@ void MainWindow::attachText(QString text) {
 }
 
 bool MainWindow::preprocess_data() {
-    attachText("Processing input data");
+    attachText("Apstrādā ieejas datus");
 
     this->n = 0;
     this->m = 0;
@@ -50,8 +50,6 @@ bool MainWindow::preprocess_data() {
             break;
         }
 
-        bool found_attr = false;
-
         for(int j = 0; j < maxCol; j++) {
 
             if(ui->tableWidget->item(i, j)->text() != "") {
@@ -70,7 +68,6 @@ bool MainWindow::preprocess_data() {
     // validation
 
     bool hasDuplicate = false;
-    int j = 0, i = 0;
     for(int j = 0; j <= this->n && !hasDuplicate; j++) { // each alternative
 
         QString valid[20] = {};
@@ -94,8 +91,8 @@ bool MainWindow::preprocess_data() {
     }
 
 
-    attachText("Read "+ QString::number(this->n) +" alternatives");
-    attachText("Read "+ QString::number(this->m) +" experts");
+    attachText("Atrastas "+ QString::number(this->n) +" alternatīvas");
+    attachText("Atrasti "+ QString::number(this->m) +" eksperti");
 
     // attributes
     if(!hasDuplicate) {
@@ -119,7 +116,7 @@ bool MainWindow::preprocess_data() {
             }
         }
 
-        attachText("Alternatives: " + attribs);
+        attachText("Alternatīvas: " + attribs);
 
     }
 
@@ -128,7 +125,7 @@ bool MainWindow::preprocess_data() {
 }
 
 void MainWindow::do_vare() {
-    attachText("Using vare method");
+    attachText("Izmanto Varē metodi");
 
     QString occurences[20] = {};
     QString discarded = "";
@@ -139,7 +136,7 @@ void MainWindow::do_vare() {
             iters++;
 
             if( iters > 50 ) {
-                attachText("50 Max iterations exceeded - stopping");
+                attachText("50 iterācijas bez rezultāta, apstādina");
                 break;
             }
 
@@ -195,7 +192,7 @@ void MainWindow::do_vare() {
                 }
             }
 
-            attachText("Step 1: following highest votes casted: \n" + votes);
+            attachText("Augstākās balsis: \n" + votes);
             qDebug() << "maxVal: " << QString::number(maxVal);
             qDebug() << "maxValval: " << occurences[maxVal];
             qDebug() << "maxVallen: " << occurences[maxVal].length();
@@ -205,11 +202,11 @@ void MainWindow::do_vare() {
                 discard.remove(occurences[maxVal], Qt::CaseInsensitive);
                 discarded.append(discard);
 
-                attachText(" discard lowest votes: " + discard);
+                attachText("Izslēdz: " + discard);
 
             }
             else {
-                attachText("\n found the winner! It is: " + occurences[maxVal]);
+                attachText("Uzvarētājs: " + occurences[maxVal]);
                 finished = true;
             }
 
@@ -220,7 +217,7 @@ void MainWindow::do_vare() {
 
 void MainWindow::do_cumbs() {
 
-    attachText("Using cumbs method");
+    attachText("Uzmanto Kumbsa metodi");
 
     QString occurences[20] = {};
     QString discarded = "";
@@ -231,7 +228,7 @@ void MainWindow::do_cumbs() {
             iters++;
 
             if( iters > 50 ) {
-                attachText("50 Max iterations exceeded - stopping");
+                attachText("50 iterācijas bez rezultāta, apstādina");
                 break;
             }
 
@@ -301,7 +298,7 @@ void MainWindow::do_cumbs() {
                 }
             }
 
-            attachText("Step 1: following highest votes casted: \n" + votes);
+            attachText("Augstākās balsis: \n" + votes);
             qDebug() << "maxVal: " << QString::number(maxVal);
             qDebug() << "maxValval: " << occurences[maxVal];
             qDebug() << "maxVallen: " << occurences[maxVal].length();
@@ -311,15 +308,149 @@ void MainWindow::do_cumbs() {
 //                discard.remove(occurences[maxVal], Qt::CaseInsensitive);
                 discarded.append(occurences[maxVal]);
 
-                attachText(" discard lowest votes: " + discard);
+                attachText("Izslēdz mazāk balsotos: " + discard);
 
             }
             else {
-                attachText("\n found the winner! It is: " + occurences[minVal]);
+                attachText("Uzvarētājs: " + occurences[minVal]);
                 finished = true;
             }
 
         }
+}
+
+void MainWindow::cpyTable() {
+   for( int i = 0; i < 20; i++) {
+       for( int j = 0; j < 20; j++) {
+           table2[i][j] = table[i][j];
+       }
+   }
+}
+
+void MainWindow::cpyTable2() {
+    for( int i = 0; i < 20; i++) {
+        for( int j = 0; j < 20; j++) {
+            table[i][j] = table2[i][j];
+        }
+    }
+}
+
+void MainWindow::do_nansons() {
+
+    QString discarded = "";
+    bool finished = false;
+    float variance = 0;
+    int iters = 0;
+
+    cpyTable();
+
+        while(!finished) {
+
+            cpyTable2();
+            iters++;
+            variance = 0;
+
+            if( iters > 50 ) {
+                attachText("50 iterācijas bez rezultāta, apstādina");
+                break;
+            }
+
+            int sums[20];
+            for( int i = 0; i < 20; i++) { // row
+                sums[i] = -1;
+            }
+
+            // calculate sum
+            for( int i = 0; i < 20; i++) { // row
+                if(table[i][0] == "") break;
+                for( int j = 0; j < 20; j++) { // column
+                    if(table[i][j] == "") break;
+
+                    for( int k = i; k < 20; k++) {
+//                        if(table[k][j] == "") break;
+
+                        // check if discarded
+                        if( discarded.contains(table[k][j], Qt::CaseInsensitive) || table[k][j] == "" ) {
+                            continue; // increase row
+                        }
+                        else {
+
+                            int idx = 0;
+                            bool found = false;
+                            for( int l = 0; l < 20; l++) {
+                                if(table[k][j] == attributes[l] && !discarded.contains(table[k][j], Qt::CaseInsensitive)) {
+                                    idx = l;
+                                    found = true;
+                                    break;
+                                }
+                            }
+
+                            if(found){
+                                if(sums[idx] == -1) sums[idx] = 0;
+                                qDebug() << "adding " << QString::number(i+1) << " to " << attributes[idx] << " " << discarded;
+                                sums[idx] += (i + 1);
+                                table[k][j] = "-";
+                                break;
+                            }
+
+                        }
+
+                    }
+
+                }
+            }
+
+            int num = 0;
+            for( int i = 0; i < 20; i++) { // row
+                if(sums[i] != -1 && !discarded.contains(attributes[i], Qt::CaseInsensitive)) {
+                    attachText(attributes[i] + " sum is: " + QString::number(sums[i]));
+                    num++;
+                }
+            }
+
+            // calculate variance
+
+            for( int i = 0; i < 20; i++) { // row
+                if(sums[i] != -1) {
+                    variance += sums[i];
+                }
+            }
+
+            qDebug() << variance << " " << num;
+            variance /= num;
+
+            attachText("Atribūtu skaits " + QString::number(num));
+            attachText("Vid.aritm. ir " + QString::number(variance));
+
+            // discard elements with sum > variance
+            // and find
+
+            for( int i = 0; i < 20; i++) {
+                if(sums[i] > variance && sums[i] != -1) {
+                    discarded.append(attributes[i]);
+                    attachText("Izslēdz "+ attributes[i]+" ar "+ QString::number(sums[i])+" > " + QString::number(variance));
+
+                }
+            }
+
+            int num_attr = 0;
+            QString attribs;
+            for( int i = 0; i < 20; i++) {
+                if(attributes[i] != "") {
+                    num_attr++;
+                    attribs.append(attributes[i]);
+                }
+
+            }
+
+            if(num == 1) {
+                attachText("Uzvarētājs: " + attributes[num-1]);
+                finished = true;
+            }
+
+
+       }
+
 }
 
 void MainWindow::do_process() {
@@ -332,6 +463,9 @@ void MainWindow::do_process() {
         else if(ui->comboBox->currentIndex() == 1) {
             do_cumbs();
         }
+        else if(ui->comboBox->currentIndex() == 2) {
+            do_nansons();
+        }
 
     }
 
@@ -341,9 +475,11 @@ void MainWindow::do_process() {
 
 void MainWindow::on_pushButton_clicked() {
 
-    attachText("\nStart processing");
+    ui->textEdit->clear();
+
+    attachText("\nSāk skaitļošanu");
     do_process();
-    attachText("Processing finished\n");
+    attachText("Skaitļošana pabeigta\n");
 
 }
 

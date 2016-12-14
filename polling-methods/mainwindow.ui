@@ -294,6 +294,11 @@
          <string>Kumbsa metode</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>Nansona metode</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item>

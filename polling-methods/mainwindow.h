@@ -27,6 +27,8 @@ public:
        {"t", "v", "w", "z", "w", "x"}
     };
 
+    QString table2[20][20];
+
     int n = 0, // table i length (when filled)
         m = 0; // table j length (when filled)
 
@@ -37,6 +39,10 @@ public:
 
     void do_vare();
     void do_cumbs();
+    void do_nansons();
+
+    void cpyTable();
+    void cpyTable2();
 
 private slots:
     void on_pushButton_clicked();
